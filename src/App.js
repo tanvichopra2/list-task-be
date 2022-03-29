@@ -1,24 +1,52 @@
-import logo from './logo.svg';
 import './App.css';
+import React from 'react';
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Lists from './components/Lists';
+import Tasks from './components/Tasks';
+import makeRequest from './utils/makeRequest';
+import { ALL_LISTS_ROUTE, LIST_ROUTE } from "./constants/routes"
+
+
 
 function App() {
+
+  const [lists, setLists] = useState([]);
+
+  useEffect(() => {
+    makeRequest({ method: 'get', url: `${ALL_LISTS_ROUTE}` }).then((listsData) => {
+
+      setLists(listsData);
+
+    });
+
+  }, []);
+
+  const addList = (name) => {
+    console.log(name);
+    makeRequest({ method: 'post', url: `${LIST_ROUTE}` }, { data: { title: name } }).then((listData) => {
+      setLists([...lists, listData]);
+
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={<Lists lists={lists} addList={addList} />}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+        </Route>
+        <Route
+          path={`/list/:id`}
+          element={<Tasks />}>
+
+        </Route>
+
+      </Routes>
+    </BrowserRouter>
   );
 }
 
